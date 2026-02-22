@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Interaction</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;display:grid;place-items:center;overflow:hidden}
+  video{max-width:90vw;max-height:90vh;cursor:pointer}
+  #hint{
+    position:fixed;left:12px;bottom:12px;
+    color:#bbb;font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background:rgba(0,0,0,.55);padding:10px 12px;border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;max-width:70vw;white-space:pre-wrap
+  }
+</style>
+</head>
+<body>
+
+<video id="v" preload="auto" playsinline>
+  <source src="video.mp4" type="video/mp4">
+</video>
+
+<div id="hint">loading…</div>
+
+<script>
+const v = document.getElementById("v");
+const hint = document.getElementById("hint");
+
+function log(msg){ hint.textContent = msg; }
+
+v.addEventListener("loadeddata", ()=>{
+  log("✅ loadeddata\nsrc = " + v.currentSrc + "\nClick video to play.");
+  v.pause();
+  v.currentTime = 0;
+});
+
+v.addEventListener("error", ()=>{
+  const code = v.error ? v.error.code : "unknown";
+  log("❌ video error\ncode = " + code + "\nsrc = " + v.currentSrc +
+      "\n\nMost common: filename/path mismatch.\nTry renaming to video.mp4 (lowercase).");
+});
+
+v.addEventListener("click", ()=>{
+  if (v.paused) v.play();
+});
+
+v.addEventListener("ended", ()=>{
+  v.pause();
+  v.currentTime = v.duration;
+  log("✅ ended (stopped on last frame)\nsrc = " + v.currentSrc + "\nClick to replay? (optional)");
+});
+</script>
+
+</body>
+</html>
