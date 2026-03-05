@@ -6,7 +6,10 @@
 <title>Video Interaction</title>
 <style>
   html,body{margin:0;height:100%;background:#000;display:grid;place-items:center;overflow:hidden}
-  video{max-width:90vw;max-height:90vh;cursor:pointer}
+  video{width:100vw;
+  height:100vh;
+  object-fit:cover;
+  cursor:pointer;}
   #hint{
     position:fixed;left:12px;bottom:12px;
     color:#bbb;font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -17,28 +20,35 @@
 </head>
 <body>
 
-<video id="v" preload="auto" playsinline>
-  <source src="video.mp4" type="video/mp4">
-</video>
-
+<video id="v" preload="auto" playsinline></video>
 <div id="hint">loading…</div>
 
 <script>
 const v = document.getElementById("v");
 const hint = document.getElementById("hint");
-
 function log(msg){ hint.textContent = msg; }
 
+const videos = ["video1.mp4","video2.mp4","video3.mp4"];
+
+let idx = Number(localStorage.getItem("vidIndex") || "-1");
+idx = (idx + 1) % videos.length;
+localStorage.setItem("vidIndex", String(idx));
+
+const pick = videos[idx];
+
+v.src = pick;
+v.load();
+
 v.addEventListener("loadeddata", ()=>{
-  log("✅ loadeddata\nsrc = " + v.currentSrc + "\nClick video to play.");
+  log("✅ loadeddata\nindex = " + idx + "\npicked = " + pick + "\nClick video to play.\nRefresh to switch (sequential).");
   v.pause();
   v.currentTime = 0;
 });
 
 v.addEventListener("error", ()=>{
   const code = v.error ? v.error.code : "unknown";
-  log("❌ video error\ncode = " + code + "\nsrc = " + v.currentSrc +
-      "\n\nMost common: filename/path mismatch.\nTry renaming to video.mp4 (lowercase).");
+  log("❌ video error\ncode = " + code + "\nindex = " + idx + "\npicked = " + pick +
+      "\n\nCheck spelling/path and filename case.");
 });
 
 v.addEventListener("click", ()=>{
@@ -48,7 +58,7 @@ v.addEventListener("click", ()=>{
 v.addEventListener("ended", ()=>{
   v.pause();
   v.currentTime = v.duration;
-  log("✅ ended (stopped on last frame)\nsrc = " + v.currentSrc + "\nClick to replay? (optional)");
+  log("✅ ended (stopped on last frame)\nRefresh to switch to next video.");
 });
 </script>
 
